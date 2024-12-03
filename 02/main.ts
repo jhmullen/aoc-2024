@@ -39,5 +39,40 @@ const two = async () => {
   console.log("two: ", safeCount)  
 }
 
+const three = async () => {
+  const reports = await loadFile("input.txt");
+
+  let count = 0;
+
+  for (let i = 0; i < reports.length; i++) {
+    const levels = reports[i].split(" ").map(d => Number(d));
+    // let safe = true;
+    let errors = 0;
+    let increasingStatus;
+    for (let j = 0; j < levels.length; j++) {
+      if (j + 1 === levels.length) break;
+      const thisLevel = levels[j];
+      const nextLevel = levels[j + 1];
+      let flipped;
+      if (increasingStatus === undefined) {
+        increasingStatus = thisLevel < nextLevel 
+      }
+      else {
+        flipped = increasingStatus !== (thisLevel < nextLevel);
+      }
+      const diff = Math.abs(thisLevel - nextLevel); 
+      const closeEnough = 1 <= diff && diff <= 3;
+      if (flipped || !closeEnough) {
+        errors++;
+      } 
+    }
+    if (errors < 2) count++;
+    // if (safe) count++;
+  }
+  
+  console.log("three: ", count);
+}
+
 one();
 two();
+three();
