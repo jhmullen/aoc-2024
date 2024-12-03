@@ -12,8 +12,6 @@ const one = async () => {
   console.log("one", result);
 }
 
-one();
-
 const two = async () => {
   const data = await loadFile("input.txt");
   const str = data.join();
@@ -32,4 +30,5 @@ const two = async () => {
   console.log("two", result);
 }
 
+one();
 two();
