@@ -19,6 +19,27 @@ const xmasCount = (matrix:string[][], x:number, y:number) => {
   return count;
 }
 
+const masCount = (matrix:string[][], x:number, y:number) => {
+  if (matrix[x][y] !== "A") return 0;
+  let count = 0;
+  try {
+   
+    const corners = [
+      matrix[x-1][y-1],
+      matrix[x+1][y-1],
+      matrix[x+1][y+1],
+      matrix[x-1][y+1]      
+    ].join().replace(/\,/g, "");
+    
+    if (["MMSS", "SSMM", "MSSM", "SMMS"].includes(corners)) count++
+    
+  } catch (e) {
+    // console.log("can't access", xo, yo)
+  }
+  return count; 
+}
+  
+
 const one = async () => {
   const data = await loadFile("input.txt");
   const matrix = data.reduce<string[][]>((acc, d) => acc.concat([d.split("")]), [])
@@ -32,8 +53,14 @@ const one = async () => {
 }
 
 const two = async () => {
-  const result = 0
-  
+  const data = await loadFile("input.txt");
+  const matrix = data.reduce<string[][]>((acc, d) => acc.concat([d.split("")]), [])
+  let result = 0;
+  for (let x = 0; x < matrix.length; x++) {
+    for (let y = 0; y < matrix[x].length; y++) {
+      result += masCount(matrix, x, y);
+    }
+  }
   console.log("two", result);
 }
 
