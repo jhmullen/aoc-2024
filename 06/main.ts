@@ -1,6 +1,8 @@
 import { loadFile } from "../utils/utils.ts";
 
-const one = async () => {
+const SIZE = 130;
+
+const loadMatrix = async() => {
   const data = await loadFile("input.txt");
   const matrix:string[][] = [];
   data.forEach((row, y) => {
@@ -8,60 +10,63 @@ const one = async () => {
       if (!matrix[x]) matrix[x] = []
       matrix[x][y] = char
     });
-  });
+  }); 
+  return matrix;
+}
 
-  const WIDTH = matrix.length;
-  const HEIGHT = matrix[0].length;
-  
-  const printMatrix = () => {
-    let str = ""
-    for (let y = 0; y < matrix.length; y++) {
-      for (let x = 0; x < matrix.length; x++) {
-        str += matrix[x][y]
-      }
-      str += "\n"
+const printMatrix = (matrix:string[][]) => {
+  let str = ""
+  for (let y = 0; y < matrix.length; y++) {
+    for (let x = 0; x < matrix.length; x++) {
+      str += matrix[x][y]
     }
-    console.log(str)
+    str += "\n"
   }
+  console.log(str)
+}
 
+type PosType = {x: number, y: number}
+
+const getStartPos = (matrix: string[][]) => {
   let startPos: PosType = { x: 0, y: 0 };
-  for (let y = 0; y < HEIGHT; y++) {
-    for (let x = 0; x < WIDTH; x++) {
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
       if (matrix[x][y] === "^") {
         startPos = { x, y };
         break;
       }
     }
   }
+  return startPos
+}
 
-  type PosType = {x: number, y: number}
+const dirs = {
+  UP: { x: 0, y: -1},
+  RIGHT: { x: 1, y: 0},
+  DOWN: { x: 0, y: 1},
+  LEFT: { x: -1, y: 0},
+};
 
-  matrix[startPos.x][startPos.y] = "Z";
+type DirType = keyof typeof dirs
+
+const nextDir = (dir: DirType): DirType => {
+  if (dir === "UP") return "RIGHT";
+  if (dir === "RIGHT") return "DOWN";
+  if (dir === "DOWN") return "LEFT";
+  if (dir === "LEFT") return "UP"
+  return "UP"
+}
+
+const route = (startPos:PosType, matrix: string[][]): string[][] => {
+  matrix[startPos.x][startPos.y] = "X";
   
-  const dirs = {
-    UP: { x: 0, y: -1},
-    RIGHT: { x: 1, y: 0},
-    DOWN: { x: 0, y: 1},
-    LEFT: { x: -1, y: 0},
-  };
-
-  type DirType = keyof typeof dirs
-
-  const nextDir = (dir: DirType): DirType => {
-    if (dir === "UP") return "RIGHT";
-    if (dir === "RIGHT") return "DOWN";
-    if (dir === "DOWN") return "LEFT";
-    if (dir === "LEFT") return "UP"
-    return "UP"
-  }
-
   let dir:DirType = "UP";
   let pos:PosType = startPos;
   let result = 1;
 
   const inBounds = (pos:PosType) =>
-    0 <= pos.x && pos.x < WIDTH &&
-    0 <= pos.y && pos.y < HEIGHT;
+    0 <= pos.x && pos.x < SIZE &&
+    0 <= pos.y && pos.y < SIZE;
 
   const nextPos = (pos:PosType, dir:DirType) => {
     const dirDiff = dirs[dir]; 
@@ -81,10 +86,20 @@ const one = async () => {
       break;
     }
   }
+  return matrix;
+}
 
-  printMatrix();
+const one = async () => {
+  
+  const matrix = await loadMatrix();
+  const startPos = getStartPos(matrix);
 
-  console.log("one", result);
+  const result = route(startPos, matrix);  
+  printMatrix(result);
+  
+  const count = result.flat().filter(char => char === "X").length;
+
+  console.log("one", count);
 }
 
 const two = async () => {
