@@ -13,6 +13,15 @@ const calc = (nums: number[], index: number = 0, total: number = 0, totals: numb
   ];
 };
 
+const calc2 = (nums: number[], index: number = 0, total: number = 0, totals: number[] = []): number[] => {
+  if (index >= nums.length) return [...totals, total];
+  return [
+    ...calc2(nums, index + 1, total + nums[index], totals),
+    ...calc2(nums, index + 1, total * nums[index], totals),
+    ...calc2(nums, index + 1, Number(`${total}${nums[index]}`), totals)
+  ];
+};
+
 const one = async () => {
   const data = await loadFile("input.txt");
 
@@ -34,7 +43,17 @@ const one = async () => {
 const two = async () => {
   const data = await loadFile("input.txt");
 
-  const result = 0;
+  const eqs = data.reduce((acc, d) => 
+    acc.concat({
+      solution: Number(d.split(":")[0]),
+      terms: d.split(": ")[1].split(" ").map(Number)
+    })
+  , [] as Equation[])
+
+  const result = eqs.reduce((acc, d) => {
+    const results = calc2(d.terms);
+    return results.includes(d.solution) ? acc + d.solution : acc;
+  }, 0)
 
   console.log("two", result);
 }
