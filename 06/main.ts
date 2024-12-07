@@ -57,12 +57,12 @@ const nextDir = (dir: DirType): DirType => {
   return "UP"
 }
 
-const route = (startPos:PosType, matrix: string[][]): string[][] => {
-  matrix[startPos.x][startPos.y] = "X";
+const route = (startPos:PosType, matrix: string[][]): string[][] | false => {
+  const matrixClone = JSON.parse(JSON.stringify(matrix));
+  matrixClone[startPos.x][startPos.y] = "X";
   
   let dir:DirType = "UP";
   let pos:PosType = startPos;
-  let result = 1;
 
   const inBounds = (pos:PosType) =>
     0 <= pos.x && pos.x < SIZE &&
@@ -72,21 +72,31 @@ const route = (startPos:PosType, matrix: string[][]): string[][] => {
     const dirDiff = dirs[dir]; 
     return { x: pos.x + dirDiff.x, y: pos.y + dirDiff.y } 
   }
+
+  const turnMap:Record<string, boolean> = {};
   
   while (inBounds(pos)) {
     const {x, y} = nextPos(pos, dir);
     try {
-      if (matrix[x][y] === "#") dir = nextDir(dir);
+      if (matrixClone[x][y] === "#") {
+        dir = nextDir(dir);
+        const newPos = nextPos(pos, dir);
+        if (matrixClone[newPos.x][newPos.y] === "#") {
+          dir = nextDir(dir);
+        }
+      }
+      const key = `${pos.x.toString().padStart(3, '0')}${pos.y.toString().padStart(3, '0')}${dir}`
+      if (turnMap[key]) return false;
+      turnMap[key] = true;
       pos = nextPos(pos, dir);
-      if (matrix[pos.x][pos.y] === ".") {
-        matrix[pos.x][pos.y] = "X";
-        result++
-      } 
+      if (matrixClone[pos.x][pos.y] === ".") {
+        matrixClone[pos.x][pos.y] = "X"; 
+      }
     } catch (e) {
       break;
     }
   }
-  return matrix;
+  return matrixClone;
 }
 
 const one = async () => {
@@ -94,8 +104,7 @@ const one = async () => {
   const matrix = await loadMatrix();
   const startPos = getStartPos(matrix);
 
-  const result = route(startPos, matrix);  
-  printMatrix(result);
+  const result = route(startPos, matrix) as string[][];  
   
   const count = result.flat().filter(char => char === "X").length;
 
@@ -104,8 +113,25 @@ const one = async () => {
 
 const two = async () => {
   
-  let result = 0;
-  console.log("two", result);
+  const matrix = await loadMatrix();
+  const startPos = getStartPos(matrix);
+
+
+  let count = 0;
+  
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      if (matrix[x][y] === ".") {
+        const matrixClone = JSON.parse(JSON.stringify(matrix));
+        matrixClone[x][y] = "#";
+        const testRoute = route(startPos, matrixClone);
+        if (!testRoute) count++
+      }
+    }
+  }
+   
+
+  console.log("two", count);
 }
 
 one();
