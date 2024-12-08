@@ -19,14 +19,8 @@ const loadMatrix = async() => {
   return matrix;
 }
 
-const one = async () => {
-  const matrix = await loadMatrix();
-
-  const rowCount = matrix.length;
-  const colCount = matrix[0].length;
-
+const matrixToAnts = (matrix:string[][])=> {
   const ants = {} as Record<string, PosType[]>;
-
   matrix.forEach((row, rowIndex) => {
     row.forEach((char, colIndex) => {
       if (char === "#") {
@@ -39,7 +33,17 @@ const one = async () => {
       }
     });
   });
+  return ants;
+}
 
+const one = async () => {
+  const matrix = await loadMatrix();
+
+  const rowCount = matrix.length;
+  const colCount = matrix[0].length;
+
+  const ants = matrixToAnts(matrix);
+  
   const visited:Record<string, boolean> = {};
 
   const result = Object.values(ants).reduce((acc, posArr) => {
@@ -71,20 +75,7 @@ const two = async () => {
   const rowCount = matrix.length;
   const colCount = matrix[0].length;
 
-  const ants = {} as Record<string, PosType[]>;
-
-  matrix.forEach((row, rowIndex) => {
-    row.forEach((char, colIndex) => {
-      if (char === "#") {
-        matrix[rowIndex][colIndex] = "."
-        char = ".";
-      }
-      if (char !== ".") {
-        if (!ants[char]) ants[char] = [];
-        ants[char].push({ x: colIndex, y: rowIndex });
-      }
-    });
-  });
+  const ants = matrixToAnts(matrix);
 
   const visited:Record<string, boolean> = {};
 
