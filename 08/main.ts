@@ -66,11 +66,63 @@ const one = async () => {
 }
 
 const two = async () => {
-  const data = await loadFile("input.txt");
+  const matrix = await loadMatrix();
 
-  const result = 0;
+  const rowCount = matrix.length;
+  const colCount = matrix[0].length;
 
-  // console.log("two", result);
+  const ants = {} as Record<string, PosType[]>;
+
+  matrix.forEach((row, rowIndex) => {
+    row.forEach((char, colIndex) => {
+      if (char === "#") {
+        matrix[rowIndex][colIndex] = "."
+        char = ".";
+      }
+      if (char !== ".") {
+        if (!ants[char]) ants[char] = [];
+        ants[char].push({ x: colIndex, y: rowIndex });
+      }
+    });
+  });
+
+  const visited:Record<string, boolean> = {};
+
+  const inBounds = (pos:PosType) => 
+    0 <= pos.x && pos.x < rowCount && 0 <= pos.y && pos.y < colCount
+
+  const keyGen = (pos:PosType) => 
+    `${pos.x.toString().padStart(3, '0')}${pos.y.toString().padStart(3, '0')}`
+
+  const result = Object.values(ants).reduce((acc, posArr) => {
+    let count = 0;
+    posArr.forEach((currentPos, index) => {
+      const rest = posArr.filter((_, i) => i !== index);
+      rest.forEach((otherPos) => {
+        const xDiff = currentPos.x - otherPos.x;
+        const yDiff = currentPos.y - otherPos.y;
+        if (!visited[keyGen(currentPos)]) {
+          count++;
+          visited[keyGen(currentPos)] = true;
+        }
+        let newPos = { x: currentPos.x + xDiff, y: currentPos.y + yDiff }
+        if (inBounds(newPos)) {
+          do {
+            const key = keyGen(newPos);
+            if (!visited[key]) {
+              count++;
+              visited[key] = true;
+            }
+            newPos = { x: newPos.x + xDiff, y: newPos.y + yDiff };
+          } while (inBounds(newPos));
+        }  
+      });
+    });
+    return acc + count;
+  }, 0);
+
+
+  console.log("two", result);
 }
 
 one();
