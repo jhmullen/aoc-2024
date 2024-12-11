@@ -1,8 +1,6 @@
-import { totalmem } from "node:os";
 import { loadFile } from "../utils/utils.ts";
 import process from "node:process";
 
-const blinkMap = {} as any;
 
 const doBlink = (digit:number) => {
   if (digit === 0) return [1];
@@ -48,7 +46,6 @@ const doBlink2 = (digit:number, blinks:number, total:number = 0):number => {
   process.stdout.write(`Processing: ${Math.round(((BLINKS-blinks) / BLINKS) * 100)}%\r`);
   const [yes, maybe] = doBlink(digit);
   
-  // console.log(`blink: ${blinks}, digit: ${digit} => ${yes}, ${maybe}`);
   const result = doBlink2(yes, blinks-1, 1) + (maybe !== undefined ? doBlink2(maybe, blinks - 1, total) : 0);
   map[key] = result;
   return result
@@ -70,5 +67,5 @@ const two = async () => {
   console.log("two", result);
 }
 
-// one();
+one();
 two();
