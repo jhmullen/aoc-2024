@@ -1,6 +1,4 @@
 import { loadFile } from "../utils/utils.ts";
-import process from "node:process";
-
 
 const doBlink = (digit:number) => {
   if (digit === 0) return [1];
@@ -20,7 +18,6 @@ const one = async () => {
   const BLINKS = 25;
 
   for (let blink = 0; blink < BLINKS; blink++) {
-    process.stdout.write(`Processing: ${Math.round((blink / BLINKS) * 100)}%\r`);
     do {
       const res = doBlink(stones[i]);
       stones.splice(i, 1, ...res);
@@ -43,7 +40,6 @@ const doBlink2 = (digit:number, blinks:number, total:number = 0):number => {
   const key = `${digit}.${blinks}`;
   if (map[key]) return map[key];
   
-  process.stdout.write(`Processing: ${Math.round(((BLINKS-blinks) / BLINKS) * 100)}%\r`);
   const [yes, maybe] = doBlink(digit);
   
   const result = doBlink2(yes, blinks-1, 1) + (maybe !== undefined ? doBlink2(maybe, blinks - 1, total) : 0);
@@ -59,7 +55,6 @@ const two = async () => {
   let result = 0;
 
   do {
-    console.log("STEP", i);
     result += doBlink2(stones[i], BLINKS);
     i++;
   } while (i < stones.length);
