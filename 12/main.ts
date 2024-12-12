@@ -68,7 +68,7 @@ const one = async () => {
   }
 
   const result = Object.entries(fences).reduce((acc, [key, val]) => {
-    const [plot, group] = key.split("_");
+    const [_, group] = key.split("_");
     const area = group.split("#").length;
     const fenceCount = Object.keys(val).length;
     return acc + area * fenceCount
@@ -100,7 +100,7 @@ const two = async () => {
   }
   
   const result = Object.entries(fences).reduce((acc, [key, val]) => {
-    const [plot, group] = key.split("_");
+    const [_, group] = key.split("_");
     const area = group.split("#").length;
     const fence = Object.keys(val);
     const fenceX: Record<string, number[]> = {};
@@ -113,31 +113,22 @@ const two = async () => {
       fenceY[y].push(Number(x));
     });
 
-    const halfX = Object.keys(fenceX).reduce((acc, d) => {
-      const skips = fenceX[d].toSorted((a, b) => a - b).reduce((skipCount, num, index, arr) => {
-        if (index > 0 && num !== arr[index - 1] + 1) {
-          skipCount++;
-        }
-        return skipCount;
-      }, 0)
-      return Number(d) % 1 !== 0 ? acc + 1 + skips : acc
-    }, 0);
-    const halfY = Object.keys(fenceY).reduce((acc, d) => {
-      const skips = fenceY[d].toSorted((a, b) => a - b).reduce((skipCount, num, index, arr) => {
-        if (index > 0 && num !== arr[index - 1] + 1) {
-          skipCount++;
-        }
-        return skipCount;
-      }, 0)
-      return Number(d) % 1 !== 0 ? acc + 1 + skips : acc
-    }, 0);
+    const calculateHalf = (fence: Record<string, number[]>) => {
+      return Object.keys(fence).reduce((acc, d) => {
+      const skips = fence[d].toSorted((a, b) => a - b).reduce((skipCount, num, index, arr) => {
+        return index > 0 && num !== arr[index - 1] + 1 ? skipCount + 1 : skipCount;
+      }, 0);
+      return Number(d) % 1 !== 0 ? acc + 1 + skips : acc;
+      }, 0);
+    };
 
-    //console.log(plot, fenceX, fenceY)
+    const halfX = calculateHalf(fenceX);
+    const halfY = calculateHalf(fenceY);
 
     return acc + ((halfX + halfY) * area)
   }, 0);
 
-  
+
   console.log("two", result);
 }
 
