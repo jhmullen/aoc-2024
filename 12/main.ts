@@ -15,10 +15,10 @@ const loadMatrix = async() => {
 }
 
 const getDirs = (matrix: string[][], ri: number, ci: number) => [
-  { next: matrix[ri - 1]?.[ci], fenceKey: `${(ri - 0.5).toFixed(1)},${ci}`, coords: { ri: ri - 1, ci } },
-  { next: matrix[ri + 1]?.[ci], fenceKey: `${(ri + 0.5).toFixed(1)},${ci}`, coords: { ri: ri + 1, ci } },
-  { next: matrix[ri]?.[ci - 1], fenceKey: `${ri},${(ci - 0.5).toFixed(1)}`, coords: { ri, ci: ci - 1 } },
-  { next: matrix[ri]?.[ci + 1], fenceKey: `${ri},${(ci + 0.5).toFixed(1)}`, coords: { ri, ci: ci + 1 } }
+  { next: matrix[ri - 1]?.[ci], fenceKey: `${(ri - 0.7).toFixed(1)},${ci}`, coords: { ri: ri - 1, ci } },
+  { next: matrix[ri + 1]?.[ci], fenceKey: `${(ri + 0.7).toFixed(1)},${ci}`, coords: { ri: ri + 1, ci } },
+  { next: matrix[ri]?.[ci - 1], fenceKey: `${ri},${(ci - 0.7).toFixed(1)}`, coords: { ri, ci: ci - 1 } },
+  { next: matrix[ri]?.[ci + 1], fenceKey: `${ri},${(ci + 0.7).toFixed(1)}`, coords: { ri, ci: ci + 1 } }
 ];
 
 const floodFind = (matrix: string[][], ri: number, ci: number) => {
@@ -66,7 +66,7 @@ const one = async () => {
       }
     }
   }
-  
+
   const result = Object.entries(fences).reduce((acc, [key, val]) => {
     const [plot, group] = key.split("_");
     const area = group.split("#").length;
@@ -83,7 +83,59 @@ const two = async () => {
   const rowCount = matrix.length;
   const colCount = matrix[0].length;
 
-  let result = 0; 
+  const fences:Record<string, Record<string, boolean>> = {}
+
+  for (let row = 0; row < rowCount; row++) {
+    for (let col = 0; col < colCount; col++) {
+      const thisPlot = matrix[row][col];
+      const thisGroup = floodFind(matrix, row, col);
+      const key = `${thisPlot}_${thisGroup}`
+      if (!fences[key]) fences[key] = {};
+      for (const {next, fenceKey} of getDirs(matrix, row, col)) {
+        if (next !== thisPlot && !fences[key][fenceKey]) {
+          fences[key][fenceKey] = true;
+        }
+      }
+    }
+  }
+  
+  const result = Object.entries(fences).reduce((acc, [key, val]) => {
+    const [plot, group] = key.split("_");
+    const area = group.split("#").length;
+    const fence = Object.keys(val);
+    const fenceX: Record<string, number[]> = {};
+    const fenceY: Record<string, number[]> = {};
+    fence.forEach(f => {
+      const [x, y] = f.split(",");
+      if (!fenceX[x]) fenceX[x] = [];
+      fenceX[x].push(Number(y));
+      if (!fenceY[y]) fenceY[y] = [];
+      fenceY[y].push(Number(x));
+    });
+
+    const halfX = Object.keys(fenceX).reduce((acc, d) => {
+      const skips = fenceX[d].toSorted((a, b) => a - b).reduce((skipCount, num, index, arr) => {
+        if (index > 0 && num !== arr[index - 1] + 1) {
+          skipCount++;
+        }
+        return skipCount;
+      }, 0)
+      return Number(d) % 1 !== 0 ? acc + 1 + skips : acc
+    }, 0);
+    const halfY = Object.keys(fenceY).reduce((acc, d) => {
+      const skips = fenceY[d].toSorted((a, b) => a - b).reduce((skipCount, num, index, arr) => {
+        if (index > 0 && num !== arr[index - 1] + 1) {
+          skipCount++;
+        }
+        return skipCount;
+      }, 0)
+      return Number(d) % 1 !== 0 ? acc + 1 + skips : acc
+    }, 0);
+
+    //console.log(plot, fenceX, fenceY)
+
+    return acc + ((halfX + halfY) * area)
+  }, 0);
 
   
   console.log("two", result);
