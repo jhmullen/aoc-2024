@@ -35,7 +35,6 @@ const printMatrix = (bots:Robot[]) => {
 
 const one = async () => {
   const data = await loadFile("input.txt");
-  const matrix: number[][] = Array.from({ length: WIDTH }, () => Array(HEIGHT).fill(0));
   const bots:Robot[] = []
   for (const robot of data) {
     const [p, v] = robot.split(" ");
@@ -43,8 +42,6 @@ const one = async () => {
     const [vx, vy] = v.split("=")[1].split(",").map(Number);
     bots.push({ p: { x: px, y: py }, v: { x: vx, y: vy } });
   }
-
-  printMatrix(bots);
 
   for (let i = 0; i < 100; i++) {
     for (const bot of bots) {
@@ -56,8 +53,6 @@ const one = async () => {
   }
 
   const quads = [0, 0, 0, 0]
-  console.log("----")
-  printMatrix(bots);
 
   for (const bot of bots) {
     if (bot.p.x < Math.floor(WIDTH / 2) && bot.p.y < Math.floor(HEIGHT / 2)) quads[0] += 1;
@@ -72,9 +67,50 @@ const one = async () => {
 
 const two = async () => {
   const data = await loadFile("input.txt");
-  let total = 0;
-  console.log("two", total);
+  const bots:Robot[] = []
+  for (const robot of data) {
+    const [p, v] = robot.split(" ");
+    const [px, py] = p.split("=")[1].split(",").map(Number);
+    const [vx, vy] = v.split("=")[1].split(",").map(Number);
+    bots.push({ p: { x: px, y: py }, v: { x: vx, y: vy } });
+  }
+
+  const iterate = () => {
+      for (const bot of bots) {
+        bot.p.x += bot.v.x;
+        bot.p.y += bot.v.y;
+        bot.p.x = (bot.p.x + WIDTH) % WIDTH;
+        bot.p.y = (bot.p.y + HEIGHT) % HEIGHT;
+      }
+   }
+  
+  // let i = 0;
+  // while (true) {
+  //   // console.log("two")
+  //   iterate();
+  //   for (let y = 0; y < HEIGHT; y++) {
+  //     let rowStr = "";
+  //     for (let x = 0; x < WIDTH; x++) {
+  //       const botCount = bots.filter(bot => bot.p.x === x && bot.p.y === y).length;
+  //       rowStr += botCount > 0 ? botCount.toString() : ".";
+  //     }
+  //     // console.log(rowStr);
+  //     if (/\d{7,}/.test(rowStr)) console.log(i);
+  //   }
+  //   i++;
+  //   // if (biggestRow > 15) console.log(i, biggestRow);
+  //   // printMatrix(bots);
+  //   // await new Promise(resolve => setTimeout(resolve, 500));
+  //   // console.clear();
+  // }
+
+  for (let i = 0; i < 7672; i++) {
+    iterate();  
+  }
+  printMatrix(bots);
+
 }
+
 
 one();
 two();
