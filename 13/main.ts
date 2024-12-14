@@ -61,6 +61,43 @@ const claw2 = (game:GameType) => {
   return lowestCost || 0;
 }
 
+const claw3 = (game:GameType) => {
+  const {a, b, prize} = game;
+  // prize.x += 10000000000000;
+  // prize.y += 10000000000000;
+  // const newStart = {x: 10000000000000 - (200 * 100), y: 10000000000000 - (200 * 100)}
+  
+  let lowestCost; 
+  let ai = 0;
+  while (true) {
+    let bi = 0;
+    const next = {x: ai * a.x + bi * b.x, y: ai * a.y + bi * b.y}
+    if (next.x > prize.x || next.y > prize.y) break; 
+    while (true) {
+      if (next.x > prize.x || next.y > prize.y) break;
+      if (prize.x === next.x  && prize.y === next.y) {
+        const cost = ai * 3 + bi;
+        if (!lowestCost || (cost < lowestCost)) lowestCost = cost;
+      }
+      bi++;
+    }
+    ai++;
+  }
+  return lowestCost || 0;
+}
+
+const claw4 = (game:GameType) => {
+  const {a, b, prize} = game; 
+  prize.x += 10000000000000;
+  prize.y += 10000000000000;
+  const ai = (prize.y * b.x - prize.x * b.y) / (a.y * b.x - a.x * b.y);
+  const bi = (prize.x - ai * a.x) / b.x;
+  if (Number.isInteger(ai) && Number.isInteger(bi) && ai >= 0 && bi >= 0) {
+    return ai * 3 + bi; 
+  }
+  return 0;
+}
+
 const one = async () => {
   const data = await getData();
   let total = 0;
@@ -71,8 +108,12 @@ const one = async () => {
 }
 
 const two = async () => {
-  const result = 0;
-  console.log("two", result);
+  const data = await getData();
+  let total = 0;
+  data.forEach((game, i) => {
+    total += claw4(game);
+  });
+  console.log("two", total);
 }
 
 one();
